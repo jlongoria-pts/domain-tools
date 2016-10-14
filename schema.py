@@ -4,6 +4,8 @@ import cherrypy
 import json
 import os
 
+### Constants and configuration.
+
 #cherrypy
 sockethost = '127.0.0.1'
 socketport = 8081
@@ -12,6 +14,9 @@ socketport = 8081
 baseUrl   = 'ux-dev.ptsteams.local/jasperserver-pro'
 authUser = 'jasperadmin'
 authPass = 'jasperadmin'
+
+
+### Dictionaries and word-banks.
 
 translations = {
     "DT": "Date",
@@ -38,7 +43,8 @@ acronyms = [
     "DOB"
 ]
 
-### Server-interaction methods
+
+### Server-interaction methods.
 
 def getDomainProperties():
 
@@ -80,6 +86,12 @@ def getDomainSchema(path):
 
     return response.text
 
+
+### Unique token-finding methods
+
+
+### Translation and formatting methods.
+
 def removeStopwords(label):
     newLabel = ""
     tokenizedLabel = label.split(" ")
@@ -117,6 +129,37 @@ def formatLabel(label):
         newLabel.append( formattedToken )
 
     return ( " ".join(newLabel) )
+
+
+### XML-tree modifying methods.
+
+def modifyNodeLabel(label):
+    label = label.replace("__", " ")
+    label = label.replace("_", " ")
+    label = label.strip()
+
+    label = removeStopwords(label)
+    label = translateLabel(label)
+    label = formatLabel(label)
+
+    return label
+
+def modifyColumnNodes(schema):
+    for item in schema.getElementsByTagName("item"):
+        label = item.getAttribute("label")
+
+        label = modifyNodeLabel(label)
+
+        item.setAttribute("label", label)
+
+def modifyTableNodes(schema):
+    for itemGroup in schema.getElementsByTagName("itemGroup"):
+        label = itemGroup.getAttribute("label")
+
+        label = modifyNodeLabel(label)
+
+        itemGroup.setAttribute("label", label)
+
 
 ### Page-rendering methods.
 
@@ -156,30 +199,14 @@ class Root(object):
     def schemaEditor(self, domainLabel, domainUri):
 
         xmlDoc = getDomainSchema(domainUri)
-
         schema = parseString(xmlDoc).documentElement
 
-        labels = []
-        for item in schema.getElementsByTagName("item"):
-            label = item.getAttribute("label")
-
-            label = label.replace("__", " ")
-            label = label.replace("_", " ")
-            label = label.strip()
-
-            label = removeStopwords(label)
-            label = translateLabel(label)
-            label = formatLabel(label)
-
-            labels.append(label + "<br>")
-
-            item.setAttribute("label", label)
+        modifyColumnNodes(schema)
 
         newXmlDoc = schema.toprettyxml(newl='')
-
         open("schema.xml", "w").write(newXmlDoc)
 
-        return open("schema.xml", "r").read()
+        return "success"
 
 
     @cherrypy.expose
