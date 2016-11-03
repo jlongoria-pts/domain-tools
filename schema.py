@@ -89,6 +89,25 @@ def getDomainSchema(path):
 
 ### Unique token-finding methods
 
+def getUniqueTokens(schema):
+    uniqueTokens = []
+    tokenContext = []
+
+    for item in schema.getElementsByTagName("item"):
+        label = item.getAttribute("label")
+
+        label = label.replace("__", " ")
+        label = label.replace("_", " ")
+        label = label.strip()
+
+        tokenizedLabel = label.split(" ")
+
+        for token in tokenizedLabel:
+            if token not in uniqueTokens:
+                uniqueTokens.append(token)
+                tokenContext.append(label)
+
+    return {"context": tokenContext, "tokens": uniqueTokens}
 
 ### Translation and formatting methods.
 
@@ -201,12 +220,22 @@ class Root(object):
         xmlDoc = getDomainSchema(domainUri)
         schema = parseString(xmlDoc).documentElement
 
-        modifyColumnNodes(schema)
+        uniqueTokens = getUniqueTokens(schema)
+        #modifyColumnNodes(schema)
 
-        newXmlDoc = schema.toprettyxml(newl='')
-        open("schema.xml", "w").write(newXmlDoc)
+        #newXmlDoc = schema.toprettyxml(newl='')
+        #open("schema.xml", "w").write(newXmlDoc)
 
-        return "success"
+        forms = ""
+        for i in range( 0, len(uniqueTokens["tokens"]) ):
+            label = uniqueTokens["context"][i]
+            value = uniqueTokens["tokens"][i]
+
+            forms += (
+              label + "<input id="+value+" value="+value+"></input> <br>"
+            )
+
+        return forms #"success"
 
 
     @cherrypy.expose
