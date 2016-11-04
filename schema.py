@@ -232,10 +232,18 @@ class Root(object):
             value = uniqueTokens["tokens"][i]
 
             forms += (
-              label + "<input id="+value+" value="+value+"></input> <br>"
+              "<tr><td>" +label+ "</td>"+
+              "<td><input id="+value+" value="+value+">"+
+              "</input></td></tr>"
             )
 
-        return forms #"success"
+        page = (
+            open("schemaEditor.html", "r")
+                .read()
+                .replace("<!--List of Unique Tokens-->", forms)
+        )
+
+        return page
 
 
     @cherrypy.expose
