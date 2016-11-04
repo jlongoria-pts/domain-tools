@@ -213,6 +213,17 @@ class Root(object):
 
         return page
 
+    @cherrypy.expose
+    def addTranslations(self, context, value):
+        translations[context] = value
+
+    @cherrypy.expose
+    def addStopwords(self, value):
+        stopwords.append(value)
+
+    @cherrypy.expose
+    def addAcronyms(self, value):
+        acronyms.append(value)
 
     @cherrypy.expose
     def schemaEditor(self, domainLabel, domainUri):
@@ -233,8 +244,10 @@ class Root(object):
 
             forms += (
               "<tr><td>" +label+ "</td>"+
-              "<td><input id="+value+" value="+value+">"+
-              "</input></td></tr>"
+              "<td><input class='tokens' id="+value+" value="+value+"></input></td>"+
+              "<td><input class='stopwords' type='checkbox' value="+value+"></input></td>"+
+              "<td><input class='acronyms' type='checkbox' value="+value+"></input></td>"+
+              "</tr>"
             )
 
         page = (

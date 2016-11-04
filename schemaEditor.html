@@ -26,11 +26,53 @@
 
   <center>
     <table id="list-of-unique-tokens">
-      <tr><th>Label Context</th><th>Unique Tokens</th></tr>
+      <tr><th>Label Context</th>
+          <th>Unique Tokens</th>
+          <th>Stopword</th>
+          <th>Acronym</th>
+      </tr>
       <!--List of Unique Tokens-->
     </table>
+
+    <button id="submit-translations">Submit</button>
   </center>
 
 </body>
+
+<script type="text/javascript">
+
+  let modified  = [],
+      stopwords = [],
+      acronyms  = [];
+
+  $(".tokens").on("change", function() {
+    modified.push(
+      {"context":this.id, "value":this.value}
+    );
+  });
+
+  $(".stopwords").on("change", function() {
+    stopwords.push(this.value);
+  });
+
+  $(".acronyms").on("change", function() {
+    acronyms.push(this.value);
+  });
+
+  $("#submit-translations").on("click", function(){
+    modified.forEach(function(token) {
+      $.get("addTranslations?context="+token.context+"&value="+token.value+"");
+    });
+
+    stopwords.forEach(function(stopword) {
+      $.get("addStopwords?value="+stopword);
+    });
+
+    acronyms.forEach(function(acronym) {
+      $.get("addAcronyms?value="+acronym);
+    });
+  });
+
+</script>
 
 </html>
