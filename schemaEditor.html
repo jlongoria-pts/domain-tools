@@ -15,6 +15,11 @@
     th,td {
       padding: 5px;
     }
+
+    div#submit-changes,
+    div#send-to-jasper {
+      display:none;
+    }
   </style>
 
   <script type="text/javascript"
@@ -24,18 +29,30 @@
 
 <body>
 
-  <center>
-    <table id="list-of-unique-tokens">
-      <tr><th>Label Context</th>
-          <th>Unique Tokens</th>
-          <th>Stopword</th>
-          <th>Acronym</th>
-      </tr>
-      <!--List of Unique Tokens-->
-    </table>
+  <div id="token-editor">
+    <center>
+      <table id="list-of-unique-tokens">
+        <tr><th>Label Context</th>
+            <th>Unique Tokens</th>
+            <th>Stopword</th>
+            <th>Acronym</th>
+        </tr>
+        <!--List of Unique Tokens-->
+      </table>
 
-    <button id="submit-translations">Submit</button>
-  </center>
+      <button id="submit-translations">Submit</button>
+    </center>
+  </div>
+
+  <div id="submit-changes">
+    Modify the schema file?
+    <button>Yes</button>
+  </div>
+
+  <div id="send-to-jasper">
+    Submit modified schema to JasperServer?
+    <button>Submit</button>
+  </div>
 
 </body>
 
@@ -59,6 +76,7 @@
     acronyms.push(this.value);
   });
 
+
   $("#submit-translations").on("click", function(){
     modified.forEach(function(token) {
       $.get("addTranslations?context="+token.context+"&value="+token.value+"");
@@ -71,7 +89,25 @@
     acronyms.forEach(function(acronym) {
       $.get("addAcronyms?value="+acronym);
     });
+
+    $("#token-editor").hide();
+    $("#submit-changes").show();
   });
+
+  $("#submit-changes > button").on("click", function() {
+    $.get("modifySchema", function(){
+      console.log("successfully modified schema");
+
+      $("#submit-changes").hide();
+      $("#send-to-jasper").show();
+    });
+  });
+
+  $("#send-to-jasper").on("click", function(){
+    $.get("submitToJasper", function() {
+      console.log("successfully sent to jasper");
+    })
+  })
 
 </script>
 
