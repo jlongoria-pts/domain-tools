@@ -92,10 +92,8 @@ def getDomainSchema(path):
 def getUniqueTokens(schema):
     uniqueTokens = []
     tokenContext = []
-    
-    for itemGroup in schema.getElementsByTagName("itemGroup"):
-        label = itemGroup.getAttribute("label")
 
+    def pushToken(label):
         label = label.replace("__", " ")
         label = label.replace("_", " ")
         label = label.strip()
@@ -106,22 +104,15 @@ def getUniqueTokens(schema):
             if token not in uniqueTokens:
                 uniqueTokens.append(token)
                 tokenContext.append(label)
+
+    for itemGroup in schema.getElementsByTagName("itemGroup"):
+        pushToken( itemGroup.getAttribute("label") )
 
     for item in schema.getElementsByTagName("item"):
-        label = item.getAttribute("label")
-
-        label = label.replace("__", " ")
-        label = label.replace("_", " ")
-        label = label.strip()
-
-        tokenizedLabel = label.split(" ")
-
-        for token in tokenizedLabel:
-            if token not in uniqueTokens:
-                uniqueTokens.append(token)
-                tokenContext.append(label)
+        pushToken( item.getAttribute("label") )
 
     return {"context": tokenContext, "tokens": uniqueTokens}
+
 
 ### Translation and formatting methods.
 
@@ -271,7 +262,7 @@ class Root(object):
 
     @cherrypy.expose
     def modifySchema(self):
-        domainUri = str(cherrypy.session.get('domainUri'))
+        domainUri = cherrypy.session.get('domainUri')
         print(domainUri)
 
         xmlDoc = getDomainSchema(domainUri)

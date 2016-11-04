@@ -104,8 +104,8 @@
   });
 
   $("#send-to-jasper").on("click", function(){
-    $.get("submitToJasper", function() {
-      console.log("successfully sent to jasper");
+    $.get("submitToJasper", function(data) {
+      console.log("successfully sent to jasper", data);
     })
   })
 
